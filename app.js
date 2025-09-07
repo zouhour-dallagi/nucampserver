@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const passport = require('passport');
 const authenticate = require('./authenticate');
-
+const config = require('./config');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const campsiteRouter=require('./routes/campsiteRouter');
@@ -14,7 +14,8 @@ const promotionRouter = require('./routes/promotionRouter');
 const mongoose = require('mongoose');
 const session=require('express-session');
 const fileStore=require('session-file-store')(session);
-const url = 'mongodb://127.0.0.1:27017/nucampsite';
+
+const url = config.mongoUrl;
 const connect = mongoose.connect(url, {});
 
 connect.then(() => console.log('Connected correctly to server'),
@@ -44,18 +45,7 @@ app.use(session({
 app.use('/',indexRouter);
 app.use('/users',usersRouter);
 
-function auth(req,res,next){
-    console.log(req.user);
 
-    if (!req.user) {
-        const err = new Error('You are not authenticated!');
-        err.status = 401;
-        return next(err);
-    } else {
-        return next();
-    }
-}
-  
 app.use(auth);
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -2,7 +2,8 @@ var express = require('express');
 const User=require('../models/user');
 var router = express.Router();
 const passport = require('passport');
-/* GET users listing. */
+const authenticate = require('../authenticate');
+
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
@@ -25,16 +26,17 @@ router.post('/signup', (req, res) => {
         }
     );
 });
-
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', passport.authenticate('local', { session: false }), (req, res) => {
+    const token = authenticate.getToken({_id: req.user._id});
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    res.json({success: true, status: 'You are successfully logged in!'});
+    res.json({success: true, token: token, status: 'You are successfully logged in!'});
 });
 
 
+
 router.get('/logout', (req, res, next) => {  
-    if (req.session && req.session.user) {  // Check for a specific user property
+    if (req.session && req.session.user) {  
         req.session.destroy((err) => {
             if (err) {
                 return next(err);
